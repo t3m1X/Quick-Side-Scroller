@@ -51,6 +51,9 @@
 #define SCROLL_SPEED 5
 #define SHIP_SPEED 3
 #define NUM_SHOTS 32
+//-----------
+#define NUM_BOMBSHOTS 15
+#define BOMB_SPEED 3
 #define SHOT_SPEED 5
 
 struct projectile
@@ -66,15 +69,23 @@ struct globals
 	SDL_Texture* background = nullptr;
 	SDL_Texture* ship = nullptr;
 	SDL_Texture* shot = nullptr;
+	//---------------------------
+	SDL_Texture* genkidama = nullptr;
 	int background_width = 0;
 	int ship_x = 0;
 	int ship_y = 0;
 	int last_shot = 0;
+	//---------------
+	int last_bombshot = 0;
 	bool fire, up, down, left, right;
+	//------------
+	bool bomb;
 	Mix_Music* music = nullptr;
 	Mix_Chunk* fx_shoot = nullptr;
 	int scroll = 0;
 	projectile shots[NUM_SHOTS];
+	//------------
+	projectile bombshots[NUM_BOMBSHOTS];
 } g; // automatically create an insteance called "g"
 
 // ----------------------------------------------------------------
@@ -91,6 +102,8 @@ void Start()
 	g.background = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/background.png"));
 	g.ship = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/ship.png"));
 	g.shot = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/shot.png"));
+	//-----------------------
+	g.genkidama = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/genki_dama.png"));
 	SDL_QueryTexture(g.background, nullptr, nullptr, &g.background_width, nullptr);
 
 	// Create mixer --
@@ -104,6 +117,8 @@ void Start()
 	g.ship_x = 100;
 	g.ship_y = SCREEN_HEIGHT / 2;
 	g.fire = g.up = g.down = g.left = g.right = false;
+	//---------------
+	g.bomb = false;
 }
 
 // ----------------------------------------------------------------
@@ -113,6 +128,8 @@ void Finish()
 	Mix_FreeChunk(g.fx_shoot);
 	Mix_CloseAudio();
 	Mix_Quit();
+	//---------------
+	SDL_DestroyTexture(g.genkidama);
 	SDL_DestroyTexture(g.shot);
 	SDL_DestroyTexture(g.ship);
 	SDL_DestroyTexture(g.background);
@@ -150,6 +167,7 @@ bool CheckInput()
 				case SDLK_RIGHT: g.right = true; break;
 				case SDLK_ESCAPE: ret = false; break;
 				case SDLK_SPACE: g.fire = (event.key.repeat == 0); break;
+				case SDLK_b: g.bomb = (event.key.repeat == 0); break;
 			}
 		}
 		else if (event.type == SDL_QUIT)
@@ -182,6 +200,8 @@ void MoveStuff()
 		++g.last_shot;
 	}
 
+	
+
 	for(int i = 0; i < NUM_SHOTS; ++i)
 	{
 		if(g.shots[i].alive)
@@ -190,6 +210,31 @@ void MoveStuff()
 				g.shots[i].x += SHOT_SPEED;
 			else
 				g.shots[i].alive = false;
+		}
+	}
+
+	//---------------
+	if (g.bomb)
+	{
+		g.bomb = false;
+
+		if (g.last_bombshot == NUM_BOMBSHOTS)
+			g.last_bombshot = 0;
+
+		g.bombshots[g.last_bombshot].alive = true;
+		g.bombshots[g.last_bombshot].x = g.ship_x + 15;
+		g.bombshots[g.last_bombshot].y = g.ship_y;
+		++g.last_bombshot;
+	}
+
+	for (int i = 0; i < NUM_BOMBSHOTS; ++i)
+	{
+		if (g.bombshots[i].alive)
+		{
+			if (g.bombshots[i].x < SCREEN_WIDTH)
+				g.bombshots[i].x += BOMB_SPEED;
+			else
+				g.bombshots[i].alive = false;
 		}
 	}
 }
@@ -221,6 +266,17 @@ void Draw()
 		{
 			target = { g.shots[i].x, g.shots[i].y, 64, 64 };
 			SDL_RenderCopy(g.renderer, g.shot, nullptr, &target);
+			
+		}
+	}
+	//-------------------Draw bomb
+	for (int i = 0; i < NUM_BOMBSHOTS; ++i)
+	{
+		if (g.bombshots[i].alive)
+		{
+			target = { g.bombshots[i].x, g.bombshots[i].y, 64, 64 };
+			//SDL_RenderCopy(g.renderer, g.shot, nullptr, &target);
+			SDL_RenderCopy(g.renderer, g.genkidama, nullptr, &target);
 		}
 	}
 
