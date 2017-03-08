@@ -103,7 +103,7 @@ void Start()
 	g.ship = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/ship.png"));
 	g.shot = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/shot.png"));
 	//-----------------------
-	g.genkidama = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/genki_dama.png"));
+	g.genkidama = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/bomb.png"));
 	SDL_QueryTexture(g.background, nullptr, nullptr, &g.background_width, nullptr);
 
 	// Create mixer --
@@ -222,8 +222,8 @@ void MoveStuff()
 			g.last_bombshot = 0;
 
 		g.bombshots[g.last_bombshot].alive = true;
-		g.bombshots[g.last_bombshot].x = g.ship_x + 15;
-		g.bombshots[g.last_bombshot].y = g.ship_y;
+		g.bombshots[g.last_bombshot].x = g.ship_x + 40;
+		g.bombshots[g.last_bombshot].y = g.ship_y + 15;
 		++g.last_bombshot;
 	}
 
@@ -274,7 +274,7 @@ void Draw()
 	{
 		if (g.bombshots[i].alive)
 		{
-			target = { g.bombshots[i].x, g.bombshots[i].y, 64, 64 };
+			target = { g.bombshots[i].x , g.bombshots[i].y, 42,32 };
 			//SDL_RenderCopy(g.renderer, g.shot, nullptr, &target);
 			SDL_RenderCopy(g.renderer, g.genkidama, nullptr, &target);
 		}
