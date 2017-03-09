@@ -52,7 +52,7 @@
 #define SHIP_SPEED 3
 #define NUM_SHOTS 32
 //-----------
-#define NUM_BOMBSHOTS 1
+#define NUM_BOMBSHOTS 3
 #define BOMB_SPEED 4
 #define SHOT_SPEED 5
 
@@ -60,6 +60,7 @@ struct projectile
 {
 	int x, y;
 	bool alive;
+	bool exploded;
 };
 
 struct globals
@@ -82,7 +83,7 @@ struct globals
 	bool fire, up, down, left, right;
 	//------------
 	bool bomb;
-	bool exploded;
+	int animation;
 	Mix_Music* music = nullptr;
 	Mix_Chunk* fx_shoot = nullptr;
 	int scroll = 0;
@@ -124,6 +125,7 @@ void Start()
 	g.fire = g.up = g.down = g.left = g.right = false;
 	//---------------
 	g.bomb = false;
+	g.animation = 0;
 }
 
 // ----------------------------------------------------------------
@@ -209,7 +211,7 @@ void MoveStuff()
 
 	for(int i = 0; i < NUM_SHOTS; ++i)
 	{
-		if(g.shots[i].alive)
+		if(g.shots[i].alive) 
 		{
 			if(g.shots[i].x < SCREEN_WIDTH)
 				g.shots[i].x += SHOT_SPEED;
@@ -224,14 +226,12 @@ void MoveStuff()
 		g.bomb = false;
 
 		if (g.last_bombshot == NUM_BOMBSHOTS)
-
-		g.last_bombshot = 0;
-
-		if (g.last_bombshot == NUM_BOMBSHOTS)
 			g.last_bombshot = 0;
-		if (g.bombshots[g.last_bombshot].alive == false)
+
+		if (g.bombshots[g.last_bombshot].alive == false && (g.last_bombshot == 0 || g.bombshots[g.last_bombshot - 1].exploded))
 		{
 			g.bombshots[g.last_bombshot].alive = true;
+			g.bombshots[g.last_bombshot].exploded = false;
 			g.bombshots[g.last_bombshot].x = g.ship_x + 40;
 			g.bombshots[g.last_bombshot].y = g.ship_y + 15;
 			++g.last_bombshot;
@@ -243,16 +243,23 @@ void MoveStuff()
 		if (g.bombshots[i].alive)
 		{
 			//---------------------- Bomb disapears after some pixels
-			if (g.bombshots[i].x > 450)
-				g.bombshots[i].alive = false;
 
-			if (g.bombshots[i].x < SCREEN_WIDTH)
-				g.bombshots[i].x += BOMB_SPEED;
-			
-				
-
-			else
-				g.bombshots[i].alive = false;
+			if (!g.bombshots[i].exploded)
+			{
+				if (g.bombshots[i].x < 450)
+					g.bombshots[i].x += BOMB_SPEED;
+				else
+					g.bombshots[i].exploded = true;
+			}
+			else 
+			{
+				if (g.bombshots[i].x > -64)
+					g.bombshots[i].x -= SCROLL_SPEED;
+				else 
+				{
+					g.bombshots[i].alive = false;
+				}
+			}
 		}
 	}
 }
@@ -273,10 +280,6 @@ void Draw()
 	target.x += g.background_width;
 	SDL_RenderCopy(g.renderer, g.background, nullptr, &target);
 
-	// Draw player's ship --
-	target = { g.ship_x, g.ship_y, 64, 64 };
-	SDL_RenderCopy(g.renderer, g.ship, nullptr, &target);
-
 	// Draw lasers --
 	for(int i = 0; i < NUM_SHOTS; ++i)
 	{
@@ -292,10 +295,28 @@ void Draw()
 	{
 		if (g.bombshots[i].alive)
 		{
-			target = { g.bombshots[i].x, g.bombshots[i].y, 40, 32 };
-			SDL_RenderCopy(g.renderer, g.genkidama, nullptr, &target);
+			if (!g.bombshots[i].exploded)
+			{
+				target = { g.bombshots[i].x, g.bombshots[i].y, 40, 32 };
+				SDL_RenderCopy(g.renderer, g.genkidama, nullptr, &target);
+			}
+			else 
+			{
+				target = { g.bombshots[i].x, g.bombshots[i].y - 16, 80, 64 };
+				if (g.animation++ < 5)
+					SDL_RenderCopy(g.renderer, g.explosion1, nullptr, &target);
+				else
+					SDL_RenderCopy(g.renderer, g.explosion2, nullptr, &target);
+				if (g.animation == 9)
+					g.animation = 0;
+
+			}
 		}
 	}
+
+	// Draw player's ship --
+	target = { g.ship_x, g.ship_y, 64, 64 };
+	SDL_RenderCopy(g.renderer, g.ship, nullptr, &target);
 
 	// Finally swap buffers
 	SDL_RenderPresent(g.renderer);
