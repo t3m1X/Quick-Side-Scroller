@@ -52,7 +52,7 @@
 #define SHIP_SPEED 3
 #define NUM_SHOTS 32
 //-----------
-#define NUM_BOMBSHOTS 15
+#define NUM_BOMBSHOTS 1
 #define BOMB_SPEED 4
 #define SHOT_SPEED 5
 
@@ -82,6 +82,7 @@ struct globals
 	bool fire, up, down, left, right;
 	//------------
 	bool bomb;
+	bool exploded;
 	Mix_Music* music = nullptr;
 	Mix_Chunk* fx_shoot = nullptr;
 	int scroll = 0;
@@ -105,18 +106,18 @@ void Start()
 	g.ship = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/ship.png"));
 	g.shot = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/shot.png"));
 	//-----------------------
-	g.genkidama = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/genki_dama.png"));
 	g.explosion1 = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/explosion1.png"));
 	g.explosion2 = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/explosion2.png"));
+	g.genkidama = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/bomb.png"));
 	SDL_QueryTexture(g.background, nullptr, nullptr, &g.background_width, nullptr);
 
 	// Create mixer --
-	/*Mix_Init(MIX_INIT_OGG);
+	Mix_Init(MIX_INIT_OGG);
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
 	g.music = Mix_LoadMUS("assets/music.ogg");
 	Mix_PlayMusic(g.music, -1);
 	g.fx_shoot = Mix_LoadWAV("assets/laser.wav");
-	*/
+	
 	// Init other vars --
 	g.ship_x = 100;
 	g.ship_y = SCREEN_HEIGHT / 2;
@@ -220,14 +221,20 @@ void MoveStuff()
 	//---------------
 	if (g.bomb)
 	{
+		g.exploded = false;
 		g.bomb = false;
+
+		if (g.last_bombshot == NUM_BOMBSHOTS)
+
+			if (g.exploded)
+				g.last_bombshot = 0;
 
 		if (g.last_bombshot == NUM_BOMBSHOTS)
 			g.last_bombshot = 0;
 
 		g.bombshots[g.last_bombshot].alive = true;
-		g.bombshots[g.last_bombshot].x = g.ship_x + 15;
-		g.bombshots[g.last_bombshot].y = g.ship_y;
+		g.bombshots[g.last_bombshot].x = g.ship_x + 40;
+		g.bombshots[g.last_bombshot].y = g.ship_y + 15;
 		++g.last_bombshot;
 	}
 
@@ -285,7 +292,7 @@ void Draw()
 	{
 		if (g.bombshots[i].alive)
 		{
-			target = { g.bombshots[i].x, g.bombshots[i].y, 64, 64 };
+			target = { g.bombshots[i].x, g.bombshots[i].y, 40, 32 };
 			SDL_RenderCopy(g.renderer, g.genkidama, nullptr, &target);
 		}
 	}
