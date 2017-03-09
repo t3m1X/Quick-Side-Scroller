@@ -53,7 +53,7 @@
 #define NUM_SHOTS 32
 //-----------
 #define NUM_BOMBSHOTS 15
-#define BOMB_SPEED 3
+#define BOMB_SPEED 4
 #define SHOT_SPEED 5
 
 struct projectile
@@ -107,12 +107,12 @@ void Start()
 	SDL_QueryTexture(g.background, nullptr, nullptr, &g.background_width, nullptr);
 
 	// Create mixer --
-	Mix_Init(MIX_INIT_OGG);
+	/*Mix_Init(MIX_INIT_OGG);
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
 	g.music = Mix_LoadMUS("assets/music.ogg");
 	Mix_PlayMusic(g.music, -1);
 	g.fx_shoot = Mix_LoadWAV("assets/laser.wav");
-
+	*/
 	// Init other vars --
 	g.ship_x = 100;
 	g.ship_y = SCREEN_HEIGHT / 2;
@@ -231,8 +231,15 @@ void MoveStuff()
 	{
 		if (g.bombshots[i].alive)
 		{
+			//---------------------- Bomb disapears after some pixels
+			if (g.bombshots[i].x > 450)
+				g.bombshots[i].alive = false;
+
 			if (g.bombshots[i].x < SCREEN_WIDTH)
 				g.bombshots[i].x += BOMB_SPEED;
+			
+				
+
 			else
 				g.bombshots[i].alive = false;
 		}
@@ -275,7 +282,6 @@ void Draw()
 		if (g.bombshots[i].alive)
 		{
 			target = { g.bombshots[i].x, g.bombshots[i].y, 64, 64 };
-			//SDL_RenderCopy(g.renderer, g.shot, nullptr, &target);
 			SDL_RenderCopy(g.renderer, g.genkidama, nullptr, &target);
 		}
 	}
