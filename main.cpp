@@ -61,6 +61,7 @@ struct projectile
 	int x, y;
 	bool alive;
 	bool exploded;
+	int animation;
 };
 
 struct globals
@@ -83,7 +84,6 @@ struct globals
 	bool fire, up, down, left, right;
 	//------------
 	bool bomb;
-	int animation;
 	Mix_Music* music = nullptr;
 	Mix_Chunk* fx_shoot = nullptr;
 	int scroll = 0;
@@ -125,7 +125,6 @@ void Start()
 	g.fire = g.up = g.down = g.left = g.right = false;
 	//---------------
 	g.bomb = false;
-	g.animation = 0;
 }
 
 // ----------------------------------------------------------------
@@ -234,6 +233,7 @@ void MoveStuff()
 			g.bombshots[g.last_bombshot].exploded = false;
 			g.bombshots[g.last_bombshot].x = g.ship_x + 40;
 			g.bombshots[g.last_bombshot].y = g.ship_y + 15;
+			g.bombshots[g.last_bombshot].animation = 0;
 			++g.last_bombshot;
 		}
 	}
@@ -302,13 +302,13 @@ void Draw()
 			}
 			else 
 			{
-				target = { g.bombshots[i].x, g.bombshots[i].y - 16, 80, 64 };
-				if (g.animation++ < 5)
+				target = { g.bombshots[i].x, g.bombshots[i].y - 42, 160, 128 };
+				if (g.bombshots[i].animation++ < 5)
 					SDL_RenderCopy(g.renderer, g.explosion1, nullptr, &target);
 				else
 					SDL_RenderCopy(g.renderer, g.explosion2, nullptr, &target);
-				if (g.animation == 9)
-					g.animation = 0;
+				if (g.bombshots[i].animation == 9)
+					g.bombshots[i].animation = 0;
 
 			}
 		}
