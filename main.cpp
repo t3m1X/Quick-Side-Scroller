@@ -280,16 +280,7 @@ void Draw()
 	target.x += g.background_width;
 	SDL_RenderCopy(g.renderer, g.background, nullptr, &target);
 
-	// Draw lasers --
-	for(int i = 0; i < NUM_SHOTS; ++i)
-	{
-		if(g.shots[i].alive)
-		{
-			target = { g.shots[i].x, g.shots[i].y, 64, 64 };
-			SDL_RenderCopy(g.renderer, g.shot, nullptr, &target);
-			
-		}
-	}
+
 	//-------------------Draw bomb
 	for (int i = 0; i < NUM_BOMBSHOTS; ++i)
 	{
@@ -311,6 +302,15 @@ void Draw()
 					g.bombshots[i].animation = 0;
 
 			}
+		}
+	}
+
+	// Draw lasers --
+	for (int i = 0; i < NUM_SHOTS; ++i) {
+		if (g.shots[i].alive) {
+			target = { g.shots[i].x, g.shots[i].y, 64, 64 };
+			SDL_RenderCopy(g.renderer, g.shot, nullptr, &target);
+
 		}
 	}
 
