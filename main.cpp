@@ -221,21 +221,21 @@ void MoveStuff()
 	//---------------
 	if (g.bomb)
 	{
-		g.exploded = false;
 		g.bomb = false;
 
 		if (g.last_bombshot == NUM_BOMBSHOTS)
 
-			if (g.exploded)
-				g.last_bombshot = 0;
+		g.last_bombshot = 0;
 
 		if (g.last_bombshot == NUM_BOMBSHOTS)
 			g.last_bombshot = 0;
-
-		g.bombshots[g.last_bombshot].alive = true;
-		g.bombshots[g.last_bombshot].x = g.ship_x + 40;
-		g.bombshots[g.last_bombshot].y = g.ship_y + 15;
-		++g.last_bombshot;
+		if (g.bombshots[g.last_bombshot].alive == false)
+		{
+			g.bombshots[g.last_bombshot].alive = true;
+			g.bombshots[g.last_bombshot].x = g.ship_x + 40;
+			g.bombshots[g.last_bombshot].y = g.ship_y + 15;
+			++g.last_bombshot;
+		}
 	}
 
 	for (int i = 0; i < NUM_BOMBSHOTS; ++i)
