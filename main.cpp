@@ -71,6 +71,8 @@ struct globals
 	SDL_Texture* shot = nullptr;
 	//---------------------------
 	SDL_Texture* genkidama = nullptr;
+	SDL_Texture* explosion1 = nullptr;
+	SDL_Texture* explosion2 = nullptr;
 	int background_width = 0;
 	int ship_x = 0;
 	int ship_y = 0;
@@ -104,6 +106,8 @@ void Start()
 	g.shot = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/shot.png"));
 	//-----------------------
 	g.genkidama = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/genki_dama.png"));
+	g.explosion1 = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/explosion1.png"));
+	g.explosion2 = SDL_CreateTextureFromSurface(g.renderer, IMG_Load("assets/explosion2.png"));
 	SDL_QueryTexture(g.background, nullptr, nullptr, &g.background_width, nullptr);
 
 	// Create mixer --
